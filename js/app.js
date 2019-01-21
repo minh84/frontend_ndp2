@@ -11,16 +11,20 @@ const inputCards = [...allCards];
 // we create a list of cards (all closed)
 let cards = [];
 
-// current open card
-let openCard = null;
-let nbMatched = 0;
-
 for (let inputCard of inputCards) {
     const card = document.createElement('li');
     card.className = 'card';
     card.innerHTML = inputCard.innerHTML;
     cards.push(card);
 }
+
+// current open card
+let openCard = null;
+let nbMatched = 0;
+
+// animation setting
+const matchAnimation = 'tada';
+const unmatchAnimation = 'shake';
 
 // keep a reference to the deck
 deck = document.querySelector('.deck');
@@ -94,7 +98,7 @@ function toggle(card) {
             onMatch(openCard, card);
             nbMatched += 2;
         } else {
-            setTimeout(onUnmatch, 500, openCard, card);
+            onUnmatch(openCard, card);
         }
 
         // either case the openCard is set to null
@@ -108,7 +112,7 @@ function toggle(card) {
 }
 
 function showCard(card) {
-    card.classList.add('open', 'show');
+	card.classList.add('open', 'show');		
 }
 
 function matchCard(card) {
@@ -117,24 +121,47 @@ function matchCard(card) {
 }
 
 function unmatchCard(card) {
-    card.classList.remove('open', 'show');
+    card.classList.remove('open', 'show', 'wrong');
 }
 
 function onMatch(firstCard, secondCard) {
     matchCard(firstCard);
     matchCard(secondCard);
 
-    // TODO: animated here
+    // TODO: animated here    
+    animateCss(firstCard, matchAnimation);
+    animateCss(secondCard, matchAnimation);
 }
 
 function onUnmatch(firstCard, secondCard) {
+	firstCard.classList.add('wrong');
+	secondCard.classList.add('wrong');
+    
     // TODO: animated here
-    unmatchCard(firstCard);
-    unmatchCard(secondCard);
+	animateCss(firstCard, unmatchAnimation, function() {
+		unmatchCard(firstCard);		
+	});
+	
+	animateCss(secondCard, unmatchAnimation, function() {
+		unmatchCard(secondCard);
+	});
 }
 
 function onWinning() {
     console.log('We win the game');
+}
+
+function animateCss(node, animationName, callback) {
+    node.classList.add('animated', animationName)
+
+    function handleAnimationEnd() {
+        node.classList.remove('animated', animationName)
+        node.removeEventListener('animationend', handleAnimationEnd)
+
+        if (typeof callback === 'function') callback()
+    }
+
+    node.addEventListener('animationend', handleAnimationEnd)
 }
 
 deck.addEventListener('click', onDeckClicked);
