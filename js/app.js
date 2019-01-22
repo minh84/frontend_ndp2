@@ -4,6 +4,7 @@
 
 // we query from index.html all card object
 const allCards = document.querySelectorAll('.card'); 
+const stars = document.querySelectorAll('.fa-star');
 
 // convert NodeList to list so that we can use it with shuffle 
 const inputCards = [...allCards];
@@ -18,16 +19,39 @@ for (let inputCard of inputCards) {
     cards.push(card);
 }
 
-// current open card
-let openCard = null;
-let nbMatched = 0;
-
 // animation setting
 const matchAnimation = 'tada';
 const unmatchAnimation = 'shake';
 
 // keep a reference to the deck
-deck = document.querySelector('.deck');
+const deck = document.querySelector('.deck');
+const moves = document.querySelector('.moves');
+const movesLabel = document.querySelector('.movesLabel');
+const restartBtn = document.querySelector('.restart');
+
+// current open card
+let firstCard = null;
+let secondCard = null;
+let nbOpened = 0;
+let nbClicked = 0;
+
+/*
+ * this function resets the game to initial state
+ */
+function reset() {
+    firstCard = null;
+    secondCard = null;
+    nbOpened = 0;
+    nbClicked = 0;
+
+    // reset star & moves
+    for (let star of stars) {
+        star.className = 'fa fa-star';
+    }
+
+    updateMove(0);
+
+}
 
 /*
  * Display the cards on the page
@@ -36,6 +60,9 @@ deck = document.querySelector('.deck');
  *   - add each card's HTML to the page
  */
 function displayCards() {
+    // reset everything
+    reset();
+
     // shuffle the list of cards
     cards = shuffle(cards);
 
@@ -44,6 +71,7 @@ function displayCards() {
     deck.innerHTML = '';
 
     for (const card of cards) {
+        card.className = 'card';
         deck.appendChild(card);
     }
 
@@ -87,44 +115,73 @@ function onDeckClicked(event) {
  * toggle a card when it's clicked
  */
 function toggle(card) {
+    nbClicked += 1;
     // first let show the card
     showCard(card);
 
     // if there is another open card => check for matching
-    if (openCard === null) {
-        openCard = card;
+    if (nbOpened % 2 == 0) {
+        firstCard = card;
+        nbOpened += 1;
     } else {
-        if (card.firstElementChild.className === openCard.firstElementChild.className) {
-            onMatch(openCard, card);
-            nbMatched += 2;
-        } else {
-            onUnmatch(openCard, card);
-        }
-
-        // either case the openCard is set to null
-        openCard = null;
+        secondCard = card;
+        nbOpened += 1;
+        checkIfMatch();
 
         // check if all the card are matched
-        if (nbMatched === cards.length) {
+        if (nbOpened === cards.length) {
             onWinning();
         }
     }
 }
 
+function checkIfMatch() {
+    // update number of moves
+    let nbMoves = nbClicked / 2;
+    updateMove(nbMoves);
+
+    if (firstCard.firstElementChild.className === secondCard.firstElementChild.className) {
+        onMatch();
+    } else {
+        onUnmatch();
+        nbOpened -= 2;
+    }    
+}
+
+function updateMove(nbMoves) {
+    if (nbMoves <= 1) {
+        movesLabel.textContent = 'Move';
+    } else {
+        movesLabel.textContent = 'Moves';
+    }
+
+    moves.textContent = nbMoves.toString();
+
+    if (nbMoves >= 16 && nbMoves < 21) {
+        toggleStar(2); // only 2 star
+    } else if (nbMoves >= 21) {
+        toggleStar(1);
+    }
+}
+
+function toggleStar(starIdx) {
+    stars[starIdx].className = 'fa fa-star-o';
+}
+
 function showCard(card) {
-	card.classList.add('open', 'show');		
+    card.classList.add('flipInY', 'open', 'show');
 }
 
 function matchCard(card) {
-    card.classList.remove('open', 'show');
-    card.classList.add('match');
+    card.classList.remove('flipInY', 'open', 'show');
+    card.classList.add('match', 'tada');
 }
 
 function unmatchCard(card) {
-    card.classList.remove('open', 'show', 'wrong');
+    card.className = 'card';
 }
 
-function onMatch(firstCard, secondCard) {
+function onMatch() {
     matchCard(firstCard);
     matchCard(secondCard);
 
@@ -133,7 +190,7 @@ function onMatch(firstCard, secondCard) {
     animateCss(secondCard, matchAnimation);
 }
 
-function onUnmatch(firstCard, secondCard) {
+function onUnmatch() {
 	firstCard.classList.add('wrong');
 	secondCard.classList.add('wrong');
     
@@ -152,10 +209,10 @@ function onWinning() {
 }
 
 function animateCss(node, animationName, callback) {
-    node.classList.add('animated', animationName)
+    node.classList.add(animationName)
 
     function handleAnimationEnd() {
-        node.classList.remove('animated', animationName)
+        node.classList.remove(animationName)
         node.removeEventListener('animationend', handleAnimationEnd)
 
         if (typeof callback === 'function') callback()
@@ -164,6 +221,8 @@ function animateCss(node, animationName, callback) {
     node.addEventListener('animationend', handleAnimationEnd)
 }
 
-deck.addEventListener('click', onDeckClicked);
 
+
+deck.addEventListener('click', onDeckClicked);
+restartBtn.addEventListener('click', displayCards);
 displayCards();
