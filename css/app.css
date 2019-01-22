@@ -114,6 +114,53 @@ h1 {
 }
 
 /*
+ * Styles for winning pop-up
+ */ 
+#popup {
+    display: none;      /*hidden*/
+    z-index: 1;         /*sit on top*/
+    position: fixed;    /*stay in place*/
+    width: 100%;        /*full width*/
+    height: 100%;       /*full height*/    
+    padding-top: 0;     /*location of the box*/
+    margin: 0 auto;
+    left: 0;
+    top: 0;
+}
+
+.popup-content {
+    background-color: white;
+    margin: 0 auto;
+    height: 100%;
+    width: 100%;
+    padding: 20px;
+    text-align: center;
+    font-family: 'Helvetica';
+    -webkit-animation-name: zoomIn;
+    -webkit-animation-duration: 1s;
+    animation-name: zoomIn;
+    animation-duration: 1s;
+}
+
+.popup-content h1 {
+    font-size: 3em;
+    padding-top: 4em;
+    color: #8c4ed6;
+    font-weight: bolder;
+}
+
+.popup-content h3 {
+    font-weight: normal;
+    color: #4f4f4f;
+}
+
+#play-again-btn {
+    background-color: #18bf8f;
+    color: white;
+    font-size: 16px;    
+}
+
+/*
  * Styles for animation, extracted from https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.7.0/animate.css
  * flipInY: is used when we open a card;
  * tada: is used when we make a correct guess;
@@ -331,4 +378,28 @@ animation-name: shake;
 animation-duration: 1s;
 -webkit-animation-fill-mode: both;
 animation-fill-mode: both;
+}
+
+@-webkit-keyframes zoomIn {
+  from {
+    opacity: 0;
+    -webkit-transform: scale3d(0.3, 0.3, 0.3);
+    transform: scale3d(0.3, 0.3, 0.3);
+  }
+
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes zoomIn {
+  from {
+    opacity: 0;
+    -webkit-transform: scale3d(0.3, 0.3, 0.3);
+    transform: scale3d(0.3, 0.3, 0.3);
+  }
+
+  50% {
+    opacity: 1;
+  }
 }

@@ -26,23 +26,29 @@ const unmatchAnimation = 'shake';
 // keep a reference to the deck
 const deck = document.querySelector('.deck');
 const moves = document.querySelector('.moves');
-const movesLabel = document.querySelector('.movesLabel');
+const movesLabel = document.querySelector('.moves-label');
 const restartBtn = document.querySelector('.restart');
 
+const popup = document.querySelector('#popup');
+const playAgainBtn = document.querySelector('#play-again-btn');
+const totalMoves = document.querySelector('#total-moves')
+const starRating = document.querySelector('#star-rating')
 // current open card
 let firstCard = null;
 let secondCard = null;
 let nbOpened = 0;
 let nbClicked = 0;
+let nbStar = 3;
 
 /*
  * this function resets the game to initial state
  */
-function reset() {
+function resetGame() {
     firstCard = null;
     secondCard = null;
     nbOpened = 0;
     nbClicked = 0;
+    nbStar = 3;
 
     // reset star & moves
     for (let star of stars) {
@@ -50,7 +56,7 @@ function reset() {
     }
 
     updateMove(0);
-
+    displayCards();
 }
 
 /*
@@ -59,10 +65,7 @@ function reset() {
  *   - loop through each card and create its HTML
  *   - add each card's HTML to the page
  */
-function displayCards() {
-    // reset everything
-    reset();
-
+function displayCards() {    
     // shuffle the list of cards
     cards = shuffle(cards);
 
@@ -107,7 +110,17 @@ function shuffle(array) {
 function onDeckClicked(event) {
     // only react when we click on un-shown card
     if (event.target.className === 'card') { 
-        toggle(event.target)
+    	let checkNotWrong = true;
+    	for (const card of cards) {
+    		if (card.classList.contains('wrong')) {
+    			checkNotWrong = false;
+    			break;
+    		}
+    	}
+
+    	if (checkNotWrong) {
+    		toggle(event.target);	
+    	}        
     }
 }
 
@@ -159,8 +172,10 @@ function updateMove(nbMoves) {
 
     if (nbMoves >= 16 && nbMoves < 21) {
         toggleStar(2); // only 2 star
+        nbStar = 2;
     } else if (nbMoves >= 21) {
         toggleStar(1);
+        nbStar = 1;
     }
 }
 
@@ -205,7 +220,17 @@ function onUnmatch() {
 }
 
 function onWinning() {
-    console.log('We win the game');
+	let nbMoves = nbClicked / 2;
+
+	// display winning-pop up
+    popup.style.display = 'block';    
+    totalMoves.textContent = nbMoves.toString();
+    starRating.textContent = nbStar.toString();
+}
+
+function playAgain() {
+	popup.style.display = 'none';	
+	resetGame();
 }
 
 function animateCss(node, animationName, callback) {
@@ -224,5 +249,6 @@ function animateCss(node, animationName, callback) {
 
 
 deck.addEventListener('click', onDeckClicked);
-restartBtn.addEventListener('click', displayCards);
-displayCards();
+restartBtn.addEventListener('click', resetGame);
+playAgainBtn.addEventListener('click', playAgain);
+resetGame();
