@@ -28,17 +28,28 @@ const deck = document.querySelector('.deck');
 const moves = document.querySelector('.moves');
 const movesLabel = document.querySelector('.moves-label');
 const restartBtn = document.querySelector('.restart');
+const timerMin = document.querySelector('#minutes');
+const timerSec = document.querySelector('#seconds');
+
 
 const popup = document.querySelector('#popup');
 const playAgainBtn = document.querySelector('#play-again-btn');
-const totalMoves = document.querySelector('#total-moves')
-const starRating = document.querySelector('#star-rating')
+const totalMinutes = document.querySelector('#total-minutes');
+const totalSeconds = document.querySelector('#total-seconds');
+const totalMoves = document.querySelector('#total-moves');
+const starRating = document.querySelector('#star-rating');
+
+
 // current open card
 let firstCard = null;
 let secondCard = null;
 let nbOpened = 0;
 let nbClicked = 0;
 let nbStar = 3;
+let timer;
+let startTime = null;
+let nbMinutes = 0;
+let nbSeconds = 0;
 
 /*
  * this function resets the game to initial state
@@ -49,6 +60,17 @@ function resetGame() {
     nbOpened = 0;
     nbClicked = 0;
     nbStar = 3;
+    startTime = new Date().getTime();
+    timer = setInterval(function(){
+        let now = new Date().getTime();
+        let dist = Math.floor((now - startTime) / 1000); // total seconds
+        nbMinutes = Math.floor(dist / 60);
+        nbSeconds = dist % 60;
+
+
+        timerMin.textContent = formatTime(nbMinutes);
+        timerSec.textContent = formatTime(nbSeconds);
+    }, 500);
 
     // reset star & moves
     for (let star of stars) {
@@ -57,6 +79,14 @@ function resetGame() {
 
     updateMove(0);
     displayCards();
+}
+
+function formatTime(nbMinSec) {
+    if (nbMinSec < 10) {
+        return '0' + nbMinSec;
+    } else {
+        return nbMinSec.toString();
+    }
 }
 
 /*
@@ -220,12 +250,16 @@ function onUnmatch() {
 }
 
 function onWinning() {
+    clearInterval(timer);
 	let nbMoves = nbClicked / 2;
+
+    totalMinutes.textContent = formatTime(nbMinutes);
+    totalSeconds.textContent = formatTime(nbSeconds);
+    totalMoves.textContent = nbMoves.toString();
+    starRating.textContent = nbStar.toString();
 
 	// display winning-pop up
     popup.style.display = 'block';    
-    totalMoves.textContent = nbMoves.toString();
-    starRating.textContent = nbStar.toString();
 }
 
 function playAgain() {
